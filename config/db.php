@@ -1,4 +1,5 @@
 <?php
+// Database Configuration
 $host = 'localhost';
 $user = 'root';
 $password = '';
@@ -13,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 // Set charset
-$conn->set_charset("utf8");
+$conn->set_charset("utf8mb4");
 
 // Enable error reporting
 error_reporting(E_ALL);

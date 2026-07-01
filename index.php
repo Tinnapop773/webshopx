@@ -1,3 +1,21 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once 'config/db_init.php';
+require_once 'classes/Product.php';
+require_once 'classes/Admin.php';
+
+$product = new Product($conn);
+$admin = new Admin($conn);
+$config = $admin->getConfig();
+
+$page = $_GET['page'] ?? 1;
+$search = $_GET['search'] ?? '';
+$result = $product->getAllProducts($page, 12, $search);
+$products = $result['products'];
+?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -20,7 +38,7 @@
             background: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             padding: 1rem 0;
-            border-bottom: 3px solid #3498db;
+            border-bottom: 3px solid <?php echo $config['primary_color']; ?>;
         }
 
         nav {
@@ -34,13 +52,14 @@
 
         nav h1 {
             font-size: 2rem;
-            color: #3498db;
+            color: <?php echo $config['primary_color']; ?>;
         }
 
         nav .links {
             display: flex;
             gap: 2rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         nav a, nav button {
@@ -54,18 +73,18 @@
         }
 
         nav .btn-primary {
-            background: #3498db;
+            background: <?php echo $config['primary_color']; ?>;
             color: white;
             border-radius: 5px;
             padding: 0.7rem 1.5rem;
         }
 
         nav .btn-primary:hover {
-            background: #2980b9;
+            opacity: 0.9;
         }
 
         .hero {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: linear-gradient(135deg, <?php echo $config['primary_color']; ?>, <?php echo $config['secondary_color']; ?>);
             color: white;
             padding: 3rem 2rem;
             text-align: center;
@@ -143,11 +162,11 @@
         .product-price {
             font-size: 1.3rem;
             font-weight: bold;
-            color: #3498db;
+            color: <?php echo $config['primary_color']; ?>;
         }
 
         .btn-add {
-            background: #2ecc71;
+            background: <?php echo $config['secondary_color']; ?>;
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -157,7 +176,7 @@
         }
 
         .btn-add:hover {
-            background: #27ae60;
+            opacity: 0.9;
         }
 
         footer {
@@ -201,11 +220,6 @@
             color: #aaa;
         }
 
-        .loading {
-            text-align: center;
-            padding: 2rem;
-        }
-
         .no-products {
             text-align: center;
             padding: 2rem;
@@ -235,27 +249,10 @@
     </style>
 </head>
 <body>
-    <?php
-    session_start();
-    require_once 'config/db.php';
-    require_once 'classes/Product.php';
-    require_once 'classes/Admin.php';
-
-    $product = new Product($conn);
-    $admin = new Admin($conn);
-    $config = $admin->getConfig();
-
-    $page = $_GET['page'] ?? 1;
-    $search = $_GET['search'] ?? '';
-    $result = $product->getAllProducts($page, 12, $search);
-    $products = $result['products'];
-    ?>
-
     <header>
         <nav>
             <h1><?php echo htmlspecialchars($config['site_name'] ?? 'WebShopX'); ?></h1>
             <div class="links">
-                <input type="text" placeholder="🔍 ค้นหาสินค้า..." style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; width: 200px;">
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <a href="pages/cart.php">🛒 ตระกร้า</a>
                     <a href="pages/orders.php">📦 คำสั่งซื้อ</a>
@@ -288,8 +285,8 @@
                             <div class="product-name"><?php echo htmlspecialchars($prod['name']); ?></div>
                             <div class="product-description"><?php echo htmlspecialchars(substr($prod['description'], 0, 100)); ?>...</div>
                             <div class="product-footer">
-                                <span class="product-price" style="color: <?php echo htmlspecialchars($config['primary_color'] ?? '#3498db'); ?>">฿<?php echo number_format($prod['price'], 2); ?></span>
-                                <button class="btn-add" style="background: <?php echo htmlspecialchars($config['secondary_color'] ?? '#2ecc71'); ?>">ซื้อเลย</button>
+                                <span class="product-price">฿<?php echo number_format($prod['price'], 2); ?></span>
+                                <button class="btn-add">ซื้อเลย</button>
                             </div>
                         </div>
                     </div>
